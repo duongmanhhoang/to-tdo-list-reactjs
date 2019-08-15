@@ -2,13 +2,14 @@ import React, {Component} from 'react';
 import TaskForm from "./components/TaskForm/TaskForm";
 import Control from "./components/Control/Control";
 import TaskList from "./components/TaskList/TaskList";
+import {connect} from 'react-redux';
+import * as actions from './actions/index';
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            tasks: [],
-            isDisplayForm: true,
+            isDisplayForm: false,
             filter: {
                 name: '',
                 status: 2,
@@ -21,79 +22,8 @@ class App extends Component {
     };
 
 
-    componentDidMount() {
-        if (localStorage && localStorage.getItem('tasks')) {
-            let tasks = JSON.parse(localStorage.getItem(('tasks')));
-            this.setState({
-                tasks: tasks
-            });
-        }
-    }
-
-    // onGenerateData = () => {
-    //     let tasks = [
-    //         {
-    //             id: 1,
-    //             name: 'Laravel',
-    //             status: true,
-    //         },
-    //         {
-    //             id: 2,
-    //             name: 'Javascript',
-    //             status: true,
-    //         },
-    //         {
-    //             id: 3,
-    //             name: 'Reactjs',
-    //             status: true,
-    //         }
-    //     ];
-    //
-    //     this.setState({
-    //         tasks: tasks
-    //     });
-    //     localStorage.setItem('tasks', JSON.stringify(tasks));
-    // };
-
     displayForm = () => {
-        this.setState({
-            isDisplayForm: !this.state.isDisplayForm
-        });
-    };
-
-    closeForm = () => {
-        this.setState({
-            isDisplayForm: !this.state.isDisplayForm
-        });
-    };
-
-    onSubmit = (data) => {
-        let tasks = this.state.tasks;
-        tasks.push(data);
-        this.setState({
-            tasks: tasks,
-        });
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-    };
-
-    updateStatus = (task) => {
-        let {tasks} = this.state;
-        if (tasks[task.id]) {
-            tasks[task.id] = task
-        }
-        this.setState({
-            tasks: tasks
-        });
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-    };
-
-    delete = (task) => {
-        let {tasks} = this.state;
-        tasks = tasks.filter(item => item.id !== task.id);
-        this.setState({
-            tasks: tasks,
-        });
-        localStorage.setItem('tasks', JSON.stringify(tasks));
+        this.props.toggleForm();
     };
 
     update = (task) => {
@@ -128,37 +58,39 @@ class App extends Component {
     };
 
     render() {
-        let {tasks, isDisplayForm, filter, sort} = this.state;
-        if (filter) {
-            if(filter.name) {
-                tasks = tasks.filter(task => {
-                   return task.name.indexOf(filter.name) !== -1;
-                });
-            }
-            if (filter.status) {
-                tasks = tasks.filter(task => {
-                    if (filter.status === 2) {
-                        return task;
-                    } else if(filter.status === 1) {
-                        return task.status === true;
-                    } else{
-                        return task.status === false;
-                    }
-                })
-            }
-        }
-        if (sort) {
-            tasks.sort((a, b) => {
-                if (sort.by === 'name') {
-                    if (sort.value === 'asc') {
-                        return 1
-                    } else {
-                        return -1
-                    }
-                }
-            });
-        }
-        let taskForm = isDisplayForm ? <TaskForm onSubmit={this.onSubmit} closeForm={this.closeForm}/> : '';
+        // if (filter) {
+        //     if(filter.name) {
+        //         tasks = tasks.filter(task => {
+        //            return task.name.indexOf(filter.name) !== -1;
+        //         });
+        //     }
+        //     if (filter.status) {
+        //         tasks = tasks.filter(task => {
+        //             if (filter.status === 2) {
+        //                 return task;
+        //             } else if(filter.status === 1) {
+        //                 return task.status === true;
+        //             } else{
+        //                 return task.status === false;
+        //             }
+        //         })
+        //     }
+        // }
+        // if (sort) {
+        //     tasks.sort((a, b) => {
+        //         if (sort.by === 'name') {
+        //             if (sort.value === 'asc') {
+        //                 return 1
+        //             } else {
+        //                 return -1
+        //             }
+        //         }
+        //
+        //         return -1;
+        //     });
+        // }
+        let {isDisplayForm} = this.props;
+        let taskForm = isDisplayForm ? <TaskForm /> : '';
         return (
             <div>
                 <div className="container">
@@ -172,11 +104,8 @@ class App extends Component {
                             <button type="button" className="btn btn-primary" onClick={this.displayForm}>
                                 {isDisplayForm ? 'Đóng Form' : 'Thêm công việc'}
                             </button>
-                            {/*<button type="button" className="btn btn-warning ml-2" onClick={this.onGenerateData}>*/}
-                            {/*    Generate data*/}
-                            {/*</button>*/}
                             <Control sort={this.sort}/>
-                            <TaskList tasks={tasks} updateStatus={this.updateStatus} delete={this.delete} update={this.update} filter={this.onFilter}/>
+                            <TaskList update={this.update} filter={this.onFilter}/>
                         </div>
                     </div>
                 </div>
@@ -185,4 +114,18 @@ class App extends Component {
     }
 }
 
-export default App;
+const mapStateToProps = state => {
+    return {
+        isDisplayForm: state.formControl,
+    }
+};
+
+const mapDispatchToProps = (dispatch, props) => {
+    return {
+        toggleForm: () => {
+            dispatch(actions.toggleForm())
+        },
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -1,17 +1,22 @@
 import React, {Component} from 'react';
+import {connect} from 'react-redux';
+import * as actions from './../../actions/index';
 
 class EditTask extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            id: '',
             name: '',
         };
     };
+
     onChange = (event) => {
         let target = event.target;
         let name = target.name;
         let value = target.value;
         this.setState({
+            id: this.props.task.id,
             [name]: value,
         })
     };
@@ -19,11 +24,7 @@ class EditTask extends Component {
     submit = (event) => {
         event.preventDefault();
         if (this.state.name !== '') {
-            this.props.onReceiveUpdate(this.state.name);
-            this.setState({
-                name: ''
-            });
-
+            this.props.updateTask(this.state);
         } else {
             alert('Bạn chưa thay đổi gì cả');
         }
@@ -62,4 +63,18 @@ class EditTask extends Component {
     }
 }
 
-export default EditTask;
+const mapStateToProps = state => {
+    return {
+        task: state.task
+    }
+};
+
+const mapDispatchToProps = (dispatch, props) => {
+      return {
+          updateTask: (task) => {
+              dispatch(actions.updateTask(task))
+          }
+      }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(EditTask);

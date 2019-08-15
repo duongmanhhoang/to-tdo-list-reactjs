@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import EditTask from "../EditTask/EditTask";
+import {connect} from "react-redux";
+import * as actions from "./../../actions/index";
 
 class TaskList extends Component {
     constructor(props) {
@@ -13,30 +15,20 @@ class TaskList extends Component {
             filterStatus: 2,
         }
     }
+
     updateStatus = (task) => {
         task.status = !task.status;
         this.props.updateStatus(task);
     };
 
     delete = (task) => {
-        this.props.delete(task)
+        this.props.deleteTask(task);
     };
 
-    onUpdate = (task) => {
-        this.setState({
-            task: task,
-        });
-
+    editTask = (task) => {
+       this.props.editTask(task);
     };
 
-    onReceiveUpdate = (name) => {
-        let task = this.state.task;
-        task.name = name;
-        this.setState({
-            task: task
-        });
-        this.props.update(this.state.task);
-    };
 
     onChange = (event) => {
         let target = event.target;
@@ -45,7 +37,7 @@ class TaskList extends Component {
         this.props.filter(
             name === 'filterName' ? value : this.state.filterName,
             name === 'filterStatus' ? value : this.state.filterStatus,
-        )
+        );
         this.setState({
             [name]: value
         });
@@ -60,14 +52,16 @@ class TaskList extends Component {
                     <td>{index + 1}</td>
                     <td>{task.name}</td>
                     <td className="text-center">
-                        <span onClick={() => this.updateStatus(task)} className={ task.status ? 'alert alert-success' : 'alert alert-danger'}>{task.status ? 'Kích hoạt' : 'Ẩn'}</span>
+                        <span onClick={() => this.updateStatus(task)}
+                              className={task.status ? 'alert alert-success' : 'alert alert-danger'}>{task.status ? 'Kích hoạt' : 'Ẩn'}</span>
                     </td>
                     <td className="text-center">
-                        <button type="button" className="btn btn-warning" onClick={() => this.onUpdate(task)} data-toggle="modal" data-target="#editModal">
+                        <button type="button" className="btn btn-warning" onClick={() => this.editTask(task)}
+                                data-toggle="modal" data-target="#editModal">
                             <span className="fa fa-pencil"/>
                         </button>
                         &nbsp;
-                        <button type="button" className="btn btn-danger" onClick={() => this.delete(task)} >
+                        <button type="button" className="btn btn-danger" onClick={() => this.delete(task)}>
                             <span className="fa fa-trash"/>
                         </button>
                     </td>
@@ -89,8 +83,10 @@ class TaskList extends Component {
                         <tbody>
                         <tr>
                             <td/>
-                            <td><input type="text" className="form-control" name="filterName" defaultValue={filterName} onChange={this.onChange}/></td>
-                            <td><select className="form-control" name="filterStatus" defaultValue={filterStatus} onChange={this.onChange}>
+                            <td><input type="text" className="form-control" name="filterName" defaultValue={filterName}
+                                       onChange={this.onChange}/></td>
+                            <td><select className="form-control" name="filterStatus" defaultValue={filterStatus}
+                                        onChange={this.onChange}>
                                 <option value={2}>Tất Cả</option>
                                 <option value={-1}>Ẩn</option>
                                 <option value={1}>Kích Hoạt</option>
@@ -101,10 +97,30 @@ class TaskList extends Component {
                         </tbody>
                     </table>
                 </div>
-              <EditTask task={this.state.task} onReceiveUpdate={this.onReceiveUpdate}/>
+                <EditTask />
             </div>
         );
     }
 }
 
-export default TaskList;
+const mapStateToProps = (state) => {
+    return {
+        tasks: state.tasks,
+    };
+};
+
+const mapDispatchToProps = (dispatch, props) => {
+    return {
+        updateStatus: (task) => {
+            dispatch(actions.updateStatus(task));
+        },
+        deleteTask: (task) => {
+            dispatch(actions.deleteTask(task));
+        },
+        editTask: (task) => {
+            dispatch(actions.editTask(task));
+        }
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TaskList);
