@@ -6,89 +6,12 @@ import {connect} from 'react-redux';
 import * as actions from './actions/index';
 
 class App extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isDisplayForm: false,
-            filter: {
-                name: '',
-                status: 2,
-            },
-            sort: {
-                by: 'name',
-                value: 'asc',
-            }
-        }
-    };
-
 
     displayForm = () => {
         this.props.toggleForm();
     };
 
-    update = (task) => {
-        let {tasks} = this.state;
-        if (tasks[task.id]) {
-            tasks[task.id] = task
-        }
-        this.setState({
-            tasks: tasks
-        });
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-        alert('Thay đổi thành công');
-    };
-
-    onFilter = (filterName, filterStatus) => {
-        let status = parseInt(filterStatus);
-        this.setState({
-            filter: {
-                name: filterName,
-                status: status
-            }
-        });
-    };
-
-    sort = (by, value) => {
-        this.setState({
-            sort: {
-                by: by,
-                value: value,
-            }
-        })
-    };
-
     render() {
-        // if (filter) {
-        //     if(filter.name) {
-        //         tasks = tasks.filter(task => {
-        //            return task.name.indexOf(filter.name) !== -1;
-        //         });
-        //     }
-        //     if (filter.status) {
-        //         tasks = tasks.filter(task => {
-        //             if (filter.status === 2) {
-        //                 return task;
-        //             } else if(filter.status === 1) {
-        //                 return task.status === true;
-        //             } else{
-        //                 return task.status === false;
-        //             }
-        //         })
-        //     }
-        // }
-        // if (sort) {
-        //     tasks.sort((a, b) => {
-        //         if (sort.by === 'name') {
-        //             if (sort.value === 'asc') {
-        //                 return 1
-        //             } else {
-        //                 return -1
-        //             }
-        //         }
-        //
-        //         return -1;
-        //     });
-        // }
         let {isDisplayForm} = this.props;
         let taskForm = isDisplayForm ? <TaskForm /> : '';
         return (
@@ -104,8 +27,8 @@ class App extends Component {
                             <button type="button" className="btn btn-primary" onClick={this.displayForm}>
                                 {isDisplayForm ? 'Đóng Form' : 'Thêm công việc'}
                             </button>
-                            <Control sort={this.sort}/>
-                            <TaskList update={this.update} filter={this.onFilter}/>
+                            <Control />
+                            <TaskList />
                         </div>
                     </div>
                 </div>

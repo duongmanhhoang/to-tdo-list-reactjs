@@ -56,6 +56,20 @@ export const getTask = (task) => {
 export const updateTask = (task) => {
     return {
         type: type.UPDATE_TASK,
-        task
+        task,
+    }
+};
+
+export const filterTable = (filter) => {
+    return {
+        type: type.FILTER_TABLE,
+        filter,
+    }
+};
+
+export const sort = (sort) => {
+    return {
+        type: type.SORT,
+        sort
     }
 };

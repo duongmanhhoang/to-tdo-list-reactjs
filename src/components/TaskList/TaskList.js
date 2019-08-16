@@ -4,13 +4,10 @@ import {connect} from "react-redux";
 import * as actions from "./../../actions/index";
 
 class TaskList extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
-            task: {
-                name: '',
-                status: true,
-            },
             filterName: '',
             filterStatus: 2,
         }
@@ -26,26 +23,57 @@ class TaskList extends Component {
     };
 
     editTask = (task) => {
-       this.props.editTask(task);
+        this.props.editTask(task);
     };
-
 
     onChange = (event) => {
         let target = event.target;
         let name = target.name;
         let value = target.value;
-        this.props.filter(
-            name === 'filterName' ? value : this.state.filterName,
-            name === 'filterStatus' ? value : this.state.filterStatus,
-        );
+        if (name === 'filterStatus') {
+            value = parseInt(value);
+        }
+        ;
+        let filter = {
+            filterName: name === 'filterName' ? value : this.state.filterName,
+            filterStatus: name === 'filterStatus' ? value : this.state.filterStatus,
+        };
+        this.props.filterTable(filter);
         this.setState({
-            [name]: value
-        });
+            [name]: value,
+        })
     };
 
     render() {
-        let {tasks} = this.props;
-        let {filterName, filterStatus} = this.state;
+        let {tasks, filter, sort} = this.props;
+        if (filter) {
+            if (filter.filterName) {
+                tasks = tasks.filter(task => task.name.indexOf(filter.filterName) !== -1);
+            }
+            if (filter.filterStatus) {
+                tasks = tasks.filter(task => {
+                    if (filter.filterStatus === 2) {
+                        return task;
+                    } else if (filter.filterStatus === 1) {
+                        return task.status === true;
+                    } else {
+                        return task.status === false;
+                    }
+                });
+            }
+        }
+        if (sort) {
+            tasks.sort((a, b) => {
+                if (sort.by === 'name') {
+                    if (sort.value === 'asc') {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                }
+                return -1;
+            });
+        };
         let listTasks = tasks.map((task, index) => {
             return (
                 <tr key={index}>
@@ -83,9 +111,9 @@ class TaskList extends Component {
                         <tbody>
                         <tr>
                             <td/>
-                            <td><input type="text" className="form-control" name="filterName" defaultValue={filterName}
+                            <td><input type="text" className="form-control" name="filterName"
                                        onChange={this.onChange}/></td>
-                            <td><select className="form-control" name="filterStatus" defaultValue={filterStatus}
+                            <td><select className="form-control" name="filterStatus"
                                         onChange={this.onChange}>
                                 <option value={2}>Tất Cả</option>
                                 <option value={-1}>Ẩn</option>
@@ -97,7 +125,7 @@ class TaskList extends Component {
                         </tbody>
                     </table>
                 </div>
-                <EditTask />
+                <EditTask/>
             </div>
         );
     }
@@ -106,6 +134,8 @@ class TaskList extends Component {
 const mapStateToProps = (state) => {
     return {
         tasks: state.tasks,
+        filter: state.filterTable,
+        sort: state.sort,
     };
 };
 
@@ -119,6 +149,9 @@ const mapDispatchToProps = (dispatch, props) => {
         },
         editTask: (task) => {
             dispatch(actions.editTask(task));
+        },
+        filterTable: (filter) => {
+            dispatch(actions.filterTable(filter));
         }
     }
 };
